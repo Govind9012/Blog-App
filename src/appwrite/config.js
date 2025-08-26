@@ -1,5 +1,6 @@
 import { Client, ID, Databases, Query, Storage } from "appwrite";
 import conf from "../conf/conf";
+import { legacy_createStore } from "@reduxjs/toolkit";
 
 
 export class Service{
@@ -70,7 +71,68 @@ export class Service{
         }
     }
 
-    
+    async getPost(slug){
+        try {
+            return await this.databases.getDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteCollectionId,
+                slug
+            )
+        } catch (error) {
+            console.log("appwrite :: getpost :: error" , error);
+            
+        }
+
+    }
+
+    async getPosts(queries = [Query.equal("status", "active")]){
+        try {
+            return await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteCollectionId,
+                queries,
+            )
+        } catch (error) {
+            console.log("appwrite :: getPosts :: error", error);
+            return false
+        }
+    }
+
+    // file upload services
+
+    async uploadFile(file){
+        try {
+            return await this.Storage.createFile(
+                conf.appwriteBucketId,
+                ID.unique(),
+                file,
+
+            )
+        } catch (error) {
+            console.log("appwrite :: uploadFile :: error", error);
+            
+        }
+    }
+
+    async deleteFile(fileId){
+        try {
+            await this.Storage.deleteFile(
+                conf.appwriteBucketId,
+                fileId
+            )
+            return true
+        } catch (error) {
+            console.log("appwrite :: deleteFile :: error", error);
+            return false
+        }
+    }
+
+    getFilPreview(fileId){
+        // return this.Storage.getFilPreview(
+        //     conf.appwriteBucketId,
+        //     fileId
+        // )
+    }
 }
 
 const service = new Service()
